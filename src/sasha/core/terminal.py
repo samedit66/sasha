@@ -6,6 +6,7 @@ import pexpect
 @dataclass
 class Result:
     """Command finished (EOF)."""
+
     output: str
     exit_status: int | None
     signal_status: int | None
@@ -14,6 +15,7 @@ class Result:
 @dataclass
 class Continue:
     """Process is still running and waiting for more input (or matched an interactive prompt)."""
+
     output: str
     matched: str | None = None  # the matched pattern text
 
@@ -21,6 +23,7 @@ class Continue:
 @dataclass
 class Error:
     """A fatal error occurred while talking to the process."""
+
     error: str
     output: str | None = None
 
@@ -28,6 +31,7 @@ class Error:
 @dataclass
 class Timeout:
     """A timeout happened; process is still alive and can be continued."""
+
     output: str
     timeout: int
 
