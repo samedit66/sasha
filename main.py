@@ -4,8 +4,8 @@ import os
 import aiogram
 import dotenv
 
+from sasha.middlewares import guard, shell
 from src.sasha import (
-    guard_middleware,
     handlers,
     utils,
 )
@@ -26,7 +26,8 @@ async def run_bot():
     allowed_ids = [
         int(i) for i in os.environ.get("ALLOWED_IDS", "").split(",")
     ]
-    dp.message.middleware(guard_middleware.GuardMiddleware(allowed_ids))
+    dp.message.middleware(guard.GuardMiddleware(allowed_ids))
+    dp.message.middleware(shell.ShellMiddleware("bash", ["-lc"]))
 
     dp.include_routers(handlers.router)
 
