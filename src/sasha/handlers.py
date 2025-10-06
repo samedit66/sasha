@@ -33,7 +33,7 @@ async def execute(
     )
 
 
-def output_message(shell_response: "terminal.Response", max_len: int = 3500) -> str:
+def output_message(shell_response: terminal.Response, max_len: int = 3500) -> str:
     """
     Format a shell.Response into a Markdown message string.
 
