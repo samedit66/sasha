@@ -46,33 +46,34 @@ def output_message(shell_response: terminal.Response, max_len: int = 3500) -> st
     match shell_response:
         case terminal.Error(error=error, output=output):
             return (
-                "🔴 **Error talking to process**\n\n"
+                "🔴 **Process error**\n\n"
                 f"**Error:**\n{prepare_output_data(error, max_len)}\n\n"
-                f"**Partial output (if any):**\n{prepare_output_data(output, max_len)}\n\n"
-                "The session was terminated."
+                f"**Partial output:**\n{prepare_output_data(output, max_len)}\n\n"
+                "Session terminated\\."
             )
 
         case terminal.Result(
             output=output, exit_status=exit_status, signal_status=signal_status
         ):
             return (
-                f"🟢 **Result** — exit={exit_status} signal={signal_status}\n\n"
+                f"🟢 **Result:** exit\\={exit_status}, signal\\={signal_status}\n\n"
                 f"{prepare_output_data(output, max_len)}"
             )
 
         case terminal.Continue(output=output, matched=matched):
             return (
-                "🟡 **Interactive / Prompt detected**\n\n"
-                f"{prepare_output_data(output, max_len)}\n\n"
-                f"**Matched prompt:**\n{prepare_output_data(matched, max_len)}\n\n"
-                "The process is waiting for more input — send the next piece of input to continue. ⏳"
+                "🟡 **Interactive prompt detected**\n\n"
+                f"{prepare_output_data(output, max_len) + "\n\n" if output else ""}"
+                f"**Prompt:**\n{prepare_output_data(matched, max_len)}\n\n"
+                "Process awaiting input \\- send the next input to continue\\. ⏳"
             )
 
         case terminal.Timeout(output=output, timeout=timeout):
+            output_block = prepare_output_data(output, max_len) if output else "No output\\."
             return (
-                f"⏱️ **Timeout** — partial output (waited {timeout} sec)\n\n"
-                f"{prepare_output_data(output, max_len)}\n\n"
-                "The command timed out but the process may still be alive. You can send more input to continue the session."
+                f"⏱️ **Timeout** (waited {timeout} sec)\n\n"
+                f"{output_block}\n\n"
+                "Command timed out, but the process may still be running\\. You can send more input to continue\\."
             )
 
         case _:
