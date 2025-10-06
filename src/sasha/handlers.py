@@ -16,17 +16,12 @@ async def check_health(message: types.Message) -> None:
     await message.reply("✅ Alive")
 
 
-@router.message(command.Command("exec", "execute"))
+@router.message(aiogram.F.text)
 async def execute(
     message: types.Message,
-    command: command.CommandObject,
     term: terminal.Terminal,
 ) -> None:
-    if command.args is None:
-        await message.reply("❗ Expected a command to execute")
-        return
-
-    shell_command = command.args.strip()
+    shell_command = message.text.strip()
     result = await term.send(shell_command)
     await message.reply(
         text=output_message(result), parse_mode=parse_mode.ParseMode.MARKDOWN_V2
