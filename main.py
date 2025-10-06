@@ -21,7 +21,9 @@ def main():
 
 
 async def run_bot():
-    bot = aiogram.Bot(token=os.environ.get["TELEGRAM_BOT_TOKEN"])
+    bot = aiogram.Bot(
+        token=os.environ.get("TELEGRAM_BOT_TOKEN"),
+    )
     dp = aiogram.Dispatcher()
     
     allowed_ids = [
@@ -32,6 +34,8 @@ async def run_bot():
     term = terminal.Terminal(
         shell_name=os.environ.get("SHELL_NAME"),
         shell_args=os.environ.get("SHELL_ARGS"),
+        env=os.environ,
+        default_timeout=int(os.environ.get("SHELL_TIMEOUT")),
     )
     dp.message.middleware(middlewares.TerminalMiddleware(term))
 
