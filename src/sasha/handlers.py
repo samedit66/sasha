@@ -34,15 +34,6 @@ async def execute(
 
 
 def output_message(shell_response: terminal.Response, max_len: int = 3500) -> str:
-    """
-    Format a shell.Response into a Markdown message string.
-
-    - Uses fenced code blocks for command output / errors to avoid needing to escape
-      Markdown special characters.
-    - Chooses a fence made of backticks longer than any backtick-run inside the content,
-      so embedded backticks won't break the block.
-    - Truncates very long outputs.
-    """
     match shell_response:
         case terminal.Error(error=error, output=output):
             return (
@@ -82,10 +73,6 @@ def output_message(shell_response: terminal.Response, max_len: int = 3500) -> st
 
 
 def prepare_output_data(output_data: str | None, max_len: int) -> str:
-    """
-    Wrap `output_data` in a fenced code block suitable for Markdown and truncate if too long.
-    If output_data is None, return a simple placeholder.
-    """
     if output_data is None:
         return "<no output>"
 
