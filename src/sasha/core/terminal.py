@@ -60,12 +60,14 @@ class Terminal:
         env: dict[str, str] | None = None,
         encoding: str = "utf8",
         default_timeout: int = 30,
+        expect_patterns: list[str] | None = None,
     ) -> None:
         self.shell_name = shell_name
         self.shell_args = [shell_args] if isinstance(shell_args, str) else shell_args
         self.env = env
         self.encoding = encoding
         self.default_timeout = default_timeout
+        self.expect_patterns = expect_patterns
         self.child: pexpect.spawn | None = None
 
     async def send(
@@ -89,6 +91,9 @@ class Terminal:
 
             if env is None:
                 env = self.env
+
+            if expect_patterns is None:
+                expect_patterns = self.expect_patterns
 
             # spawn if first call
             if self.child is None:

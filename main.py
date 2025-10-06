@@ -36,6 +36,9 @@ async def run_bot():
         shell_args=os.environ.get("SHELL_ARGS"),
         env=os.environ,
         default_timeout=int(os.environ.get("SHELL_TIMEOUT")),
+        expect_patterns=[
+            r'\[sudo\] password for .*: '
+        ],
     )
     dp.message.middleware(middlewares.TerminalMiddleware(term))
 
