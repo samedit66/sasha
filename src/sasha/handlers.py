@@ -72,7 +72,7 @@ def output_message(shell_response: terminal.Response, max_len: int = 3500) -> st
             return (
                 f"⏱️ **Timeout** — partial output (waited {timeout} sec)\n\n"
                 f"{prepare_output_data(output, max_len)}\n\n"
-                "The command timed out but the process may still be alive. You can send more input to continue the session. 🟠"
+                "The command timed out but the process may still be alive. You can send more input to continue the session."
             )
 
         case _:
