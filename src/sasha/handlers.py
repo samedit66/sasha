@@ -4,7 +4,7 @@ import aiogram
 from aiogram import types, enums
 from aiogram.filters import command
 
-from sasha.core import shell
+from src.sasha.core import terminal
 
 
 router = aiogram.Router()
@@ -19,18 +19,18 @@ async def check_health(message: types.Message) -> None:
 async def execute(
     message: types.Message,
     command: command.CommandObject,
-    terminal: shell.Command,
+    term: terminal.Terminal,
 ) -> None:
     if command.args is None:
         await message.reply("❗ Expected a command to execute")
         return
 
     shell_command = command.args
-    result = await terminal.send(shell_command)
+    result = await term.send(shell_command)
     await message.reply(text=output_message(result))
 
 
-def output_message(shell_response: shell.Response, max_len: int = 3500) -> str:
+def output_message(shell_response: terminal.Response, max_len: int = 3500) -> str:
     """
     Format a shell.Response into a Markdown message string.
 
@@ -60,11 +60,11 @@ def output_message(shell_response: shell.Response, max_len: int = 3500) -> str:
         return f"{fence}\n{s}\n{fence}"
 
     match shell_response:
-        case shell.Error(error=error, output=output):
+        case terminal.Error(error=error, output=output):
             ...
 
     # Error (fatal/unrecoverable)
-    if isinstance(shell_response, shell.Error):
+    if isinstance(shell_response, terminal.Error):
         err_block = _fence_wrap(getattr(shell_response, "error", "<no error message>"))
         partial_block = _fence_wrap(getattr(shell_response, "output", None))
         header = "❌ **Error talking to process**"
@@ -75,7 +75,7 @@ def output_message(shell_response: shell.Response, max_len: int = 3500) -> str:
         )
 
     # Result (command finished)
-    if isinstance(shell_response, shell.Result):
+    if isinstance(shell_response, terminal.Result):
         output_block = _fence_wrap(shell_response.output)
         exit_status = shell_response.exit_status
         signal_status = shell_response.signal_status
@@ -83,7 +83,7 @@ def output_message(shell_response: shell.Response, max_len: int = 3500) -> str:
         return f"{header}\n\n{output_block}"
 
     # Continue (interactive prompt / matched pattern)
-    if isinstance(shell_response, shell.Continue):
+    if isinstance(shell_response, terminal.Continue):
         output_block = _fence_wrap(shell_response.output)
         matched_block = _fence_wrap(getattr(shell_response, "matched", "<no matched text>"))
         header = "🟡 **Interactive / Prompt detected**"
@@ -94,7 +94,7 @@ def output_message(shell_response: shell.Response, max_len: int = 3500) -> str:
         )
 
     # Timeout (partial output delivered, process still alive)
-    if isinstance(shell_response, shell.Timeout):
+    if isinstance(shell_response, terminal.Timeout):
         output_block = _fence_wrap(shell_response.output)
         timeout_val = getattr(shell_response, "timeout", "unknown")
         header = f"⏱️ **Timeout** — partial output (waited {timeout_val} sec)"

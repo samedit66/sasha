@@ -35,12 +35,12 @@ class Timeout:
 type Response = Result | Continue | Error | Timeout
 
 
-class Command:
+class Terminal:
     """
     Thin wrapper around pexpect.spawn to allow dialog-style interactions.
 
     Basic usage:
-        shell = Command()  # defaults to bash -lc
+        shell = Terminal()  # defaults to bash -lc
         # If the command may prompt, provide expect_patterns to detect prompts:
         r = shell.send('sudo apt-get install package', expect_patterns=[r'[Pp]assword:'])
         if isinstance(r, Continue):
