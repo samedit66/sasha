@@ -21,15 +21,18 @@ def main():
 
 
 async def run_bot():
-    bot = aiogram.Bot(token=os.environ["BOT_TOKEN"])
+    bot = aiogram.Bot(token=os.environ.get["TELEGRAM_BOT_TOKEN"])
     dp = aiogram.Dispatcher()
-
+    
     allowed_ids = [
-        int(i) for i in os.environ.get("ALLOWED_IDS", "").split(",")
+        int(i) for i in os.environ.get("TELEGRAM_USER_ID", "").split(",")
     ]
     dp.message.middleware(middlewares.GuardMiddleware(allowed_ids))
 
-    term = terminal.Terminal(shell_name="bash", shell_args="-lc")
+    term = terminal.Terminal(
+        shell_name=os.environ.get("SHELL_NAME"),
+        shell_args=os.environ.get("SHELL_ARGS"),
+    )
     dp.message.middleware(middlewares.TerminalMiddleware(term))
 
     dp.include_routers(handlers.router)
