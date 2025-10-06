@@ -72,6 +72,7 @@ class Terminal:
         self,
         input_data: str,
         timeout: int | None = None,
+        env: dict[str, str] | None = None,
         expect_patterns: list[str] | None = None,
     ) -> Response:
         """
@@ -86,13 +87,16 @@ class Terminal:
             if timeout is None:
                 timeout = self.default_timeout
 
+            if env is None:
+                env = self.env
+
             # spawn if first call
             if self.child is None:
                 args = self.shell_args + [input_data]
                 self.child = pexpect.spawn(
                     self.shell_name,
                     args=args,
-                    env=self.env,
+                    env=env,
                     encoding=self.encoding,
                     timeout=timeout,
                 )
