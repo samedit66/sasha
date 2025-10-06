@@ -1,7 +1,8 @@
 import re
 
 import aiogram
-from aiogram import types, enums
+from aiogram import types
+from aiogram.enums import parse_mode
 from aiogram.filters import command
 
 from src.sasha.core import terminal
@@ -28,28 +29,8 @@ async def execute(
     shell_command = command.args
     result = await term.send(shell_command)
     await message.reply(
-        text=output_message(result), parse_mode=enums.parse_mode.ParseMode.MARKDOWN_V2
+        text=output_message(result), parse_mode=parse_mode.ParseMode.MARKDOWN_V2
     )
-
-
-def prepare_output_data(output_data: str | None, max_len: int) -> str:
-    """
-    Wrap `output_data` in a fenced code block suitable for Markdown and truncate if too long.
-    If output_data is None, return a simple placeholder.
-    """
-    if output_data is None:
-        return "<no output>"
-
-    if len(output_data) > max_len:
-        output_data = output_data[: max_len - 1] + "... (truncated)"
-
-    # find longest sequence of backticks in the content
-    runs = re.findall(r"`+", output_data)
-    max_run = max((len(r) for r in runs), default=0)
-    fence = "`" * max(3, max_run + 1)  # at least triple-backtick
-
-    # ensure there's no trailing spaces after fence line
-    return f"{fence}\n{output_data}\n{fence}"
 
 
 def output_message(shell_response: "terminal.Response", max_len: int = 3500) -> str:
@@ -65,10 +46,10 @@ def output_message(shell_response: "terminal.Response", max_len: int = 3500) -> 
     match shell_response:
         case terminal.Error(error=error, output=output):
             return (
-                "❌ **Error talking to process**\n\n"
+                "🔴 **Error talking to process**\n\n"
                 f"**Error:**\n{prepare_output_data(error, max_len)}\n\n"
                 f"**Partial output (if any):**\n{prepare_output_data(output, max_len)}\n\n"
-                "The session was terminated. 🔴"
+                "The session was terminated."
             )
 
         case terminal.Result(
@@ -97,3 +78,23 @@ def output_message(shell_response: "terminal.Response", max_len: int = 3500) -> 
         case _:
             # Fallback for unknown / unexpected variants
             return f"⚪️ Unexpected shell response:\n{prepare_output_data(repr(shell_response), max_len)}"
+
+
+def prepare_output_data(output_data: str | None, max_len: int) -> str:
+    """
+    Wrap `output_data` in a fenced code block suitable for Markdown and truncate if too long.
+    If output_data is None, return a simple placeholder.
+    """
+    if output_data is None:
+        return "<no output>"
+
+    if len(output_data) > max_len:
+        output_data = output_data[: max_len - 1] + "... (truncated)"
+
+    # find longest sequence of backticks in the content
+    runs = re.findall(r"`+", output_data)
+    max_run = max((len(r) for r in runs), default=0)
+    fence = "`" * max(3, max_run + 1)  # at least triple-backtick
+
+    # ensure there's no trailing spaces after fence line
+    return f"{fence}\n{output_data}\n{fence}"
