@@ -26,7 +26,7 @@ async def execute(
         await message.reply("❗ Expected a command to execute")
         return
 
-    shell_command = command.args
+    shell_command = command.args.strip()
     result = await term.send(shell_command)
     await message.reply(
         text=output_message(result), parse_mode=parse_mode.ParseMode.MARKDOWN_V2
