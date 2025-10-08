@@ -112,11 +112,11 @@ wheels = [
 
 [[package]]
 name = "coloredstrings"
-version = "2.1.0"
+version = "3.1.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/36/bb/36afed62a7e1e9d624c40e3538da757766f0eca098c6a9332263139fccd2/coloredstrings-2.1.0.tar.gz", hash = "sha256:ed5fa892336f9a3ea83ac7ce7bbdfade6eb95665b34177fb5ba4c667827b6f8e", size = 18309, upload-time = "2025-10-04T17:47:42.25Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/37/cc/662cf914887d7b5af04a4e4aadd5c5eb55fbafe5003dd82a0ea660ccb9fb/coloredstrings-3.1.0.tar.gz", hash = "sha256:4c104d729bfd1d3f2d3a9aa4d2cc6bbdd510ef62ee91dc90cb387104a6772af9", size = 19410, upload-time = "2025-10-08T22:05:30.315Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/80/85/52ef19168ccc43b2c151cdae16f345255c6125eb8bd5b1481e13830b20f5/coloredstrings-2.1.0-py3-none-any.whl", hash = "sha256:0dd9a45d54caa476fa2d6ba93a6252d2380928ff5653dfd63effdd36459587e3", size = 21330, upload-time = "2025-10-04T17:47:40.844Z" },
+    { url = "https://files.pythonhosted.org/packages/c8/1c/4e1837bb0fd5fb3c42d67df3adf5add9ab3d633191bab31673eb83ef432d/coloredstrings-3.1.0-py3-none-any.whl", hash = "sha256:87e1b11c61bd1a3de5b25304dba340b1d002d58ede022d19f719b106731f39fd", size = 22349, upload-time = "2025-10-08T22:05:28.718Z" },
 ]
 
 [[package]]
@@ -138,7 +138,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "aiogram", specifier = ">=3.22.0" },
-    { name = "coloredstrings", specifier = ">=2.1.0" },
+    { name = "coloredstrings", specifier = ">=3.1.0" },
     { name = "pexpect", specifier = ">=4.9.0" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
 ]
