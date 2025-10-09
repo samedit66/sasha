@@ -44,7 +44,6 @@ type Response = Result | Continue | Error | Timeout
 
 
 class Terminal:
-
     def __init__(
         self,
         shell_name: str = "bash",
@@ -112,7 +111,7 @@ class Terminal:
             index = await self.child.expect(patterns, timeout=timeout, async_=True)
 
             # pexpect.EOF or prompt
-            eof = (index == len(patterns) - 1)
+            eof = index == len(patterns) - 1
             if eof or index == 0:
                 if eof:
                     self.child.close(force=True)
@@ -120,7 +119,7 @@ class Terminal:
                 exit_status = self.child.exitstatus
                 signal_status = self.child.signalstatus
                 output = self.output()
-                
+
                 if eof:
                     self.child = None
                 return Result(output, exit_status, signal_status)

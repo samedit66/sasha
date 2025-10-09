@@ -18,7 +18,7 @@ async def check_health(message: types.Message) -> None:
 @router.message(aiogram.F.text)
 async def execute(
     message: types.Message,
-    term: terminal.InteractiveTerminal,
+    term: terminal.Terminal,
 ) -> None:
     shell_command = message.text.strip()
     result = await term.send(shell_command)
@@ -48,13 +48,15 @@ def output_message(shell_response: terminal.Response, max_len: int = 3500) -> st
         case terminal.Continue(output=output, matched=matched):
             return (
                 "🟡 **Interactive prompt detected**\n\n"
-                f"{prepare_output_data(output, max_len) + "\n\n" if output else ""}"
+                f"{prepare_output_data(output, max_len) + '\n\n' if output else ''}"
                 f"**Prompt:**\n{prepare_output_data(matched, max_len)}\n\n"
                 "Process awaiting input \\- send the next input to continue\\. ⏳"
             )
 
         case terminal.Timeout(output=output, timeout=timeout):
-            output_block = prepare_output_data(output, max_len) if output else "No output\\."
+            output_block = (
+                prepare_output_data(output, max_len) if output else "No output\\."
+            )
             return (
                 f"⏱️ **Timeout** \(waited {timeout} sec\)\n\n"
                 f"{output_block}\n\n"

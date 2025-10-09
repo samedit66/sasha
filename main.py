@@ -31,7 +31,7 @@ async def run_bot():
     ]
     dp.message.middleware(middlewares.GuardMiddleware(allowed_ids))
 
-    term = terminal.InteractiveTerminal(
+    term = terminal.Terminal(
         shell_name=os.environ.get("SHELL_NAME"),
         shell_args=os.environ.get("SHELL_ARGS"),
         env=os.environ,
