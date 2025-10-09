@@ -5,6 +5,8 @@
 `sasha` is a small Telegram bot that lets you run shell commands on a remote host via Telegram messages.  
 It supports truly interactive terminal sessions, so interactive prompts (for example, a `sudo` password or a Python REPL) can be handled from the Telegram chat.
 
+![Usage example image](https://github.com/samedit66/sasha/blob/main/media/usage_example.png?raw=true)
+
 ## Features
 
 - Truly interactive sessions (supports interactive prompts such as `sudo` or an interactive Python shell).
