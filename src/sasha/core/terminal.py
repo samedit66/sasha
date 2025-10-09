@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+import uuid
 
 import pexpect
 import coloredstrings as cs
@@ -83,31 +84,41 @@ class Terminal:
 
             # spawn if first call
             if self.child is None:
-                args = self.shell_args
                 self.child = pexpect.spawn(
                     self.shell_name,
-                    args=args,
+                    args=self.shell_args,
                     env=env,
                     encoding=self.encoding,
                     timeout=timeout,
                     echo=self.echo,
                 )
 
-                self.prompt = re.escape(
-                    self.child.read_nonblocking(
-                        size=128,
-                        timeout=10,
-                    ).strip()
-                )
+                # Set a unique, stable prompt and disable PROMPT_COMMAND
+                unique = f"PEXPECT_PROMPT_{uuid.uuid4().hex}> "
+
+                if self.shell_name.endswith("powershell") or self.shell_name in ("pwsh", "powershell.exe"):
+                    # PowerShell: clear window title and override prompt function
+                    # Use single quotes so the string is literal and not interpolated.
+                    self.child.sendline("$Host.UI.RawUI.WindowTitle = ''")
+                    self.child.sendline(f"function prompt {{ '{unique}' }}")
+                else:
+                    # Bash-ish: disable PROMPT_COMMAND and set a fixed PS1
+                    self.child.sendline("export PROMPT_COMMAND=''")
+                    self.child.sendline(f"export PS1='{unique}'") 
+
+                # Wait for our new prompt to appear, then store an escaped regex for it
+                await self.child.expect(re.escape(unique), timeout=10, async_=True)
+                self.prompt = re.escape(unique)
 
             # use sendline to simulate user pressing Enter
             self.child.sendline(input_data)
 
-            patterns = [self.prompt]
-            if expect_patterns is not None:
-                patterns.extend(expect_patterns)
-            patterns.extend([pexpect.TIMEOUT, pexpect.EOF])
-
+            patterns = [
+                self.prompt,
+                *expect_patterns.copy(),
+                pexpect.TIMEOUT,
+                pexpect.EOF,
+            ]
             index = await self.child.expect(patterns, timeout=timeout, async_=True)
 
             # pexpect.EOF or prompt
