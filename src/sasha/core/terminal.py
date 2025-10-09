@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 import coloredstrings as cs
 import pexpect
+import pexpect.popen_spawn
 
 
 @dataclass
@@ -85,7 +86,11 @@ class Terminal:
 
             # spawn if first call
             if self.child is None:
-                self.child = pexpect.spawn(
+                spawn = pexpect.spawn
+                if self._on_windows():
+                    spawn = pexpect.popen_spawn.PopenSpawn
+
+                self.child = spawn(
                     self.shell_name,
                     args=self.shell_args,
                     env=env,
@@ -97,10 +102,7 @@ class Terminal:
                 # Set a unique, stable prompt and disable PROMPT_COMMAND
                 unique = f"PEXPECT_PROMPT_{uuid.uuid4().hex}> "
 
-                if self.shell_name.endswith("powershell") or self.shell_name in (
-                    "pwsh",
-                    "powershell.exe",
-                ):
+                if self._on_windows():
                     # PowerShell: clear window title and override prompt function
                     # Use single quotes so the string is literal and not interpolated.
                     self.child.sendline("$Host.UI.RawUI.WindowTitle = ''")
@@ -163,6 +165,12 @@ class Terminal:
                 self.child.close(force=True)
                 self.child = None
             return Error(error=str(exc), output=partial)
+
+    def _on_windows(self) -> bool:
+        return self.shell_name.endswith("powershell") or self.shell_name in (
+            "pwsh",
+            "powershell.exe",
+        )
 
     def output(self) -> str:
         return cs.strip_ansi(self.child.before or "").strip()
