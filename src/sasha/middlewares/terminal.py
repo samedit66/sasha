@@ -8,7 +8,7 @@ class TerminalMiddleware(aiogram.BaseMiddleware):
     Middleware that injects instance of `shell.Terminal` to have access to remote shell.
     """
 
-    def __init__(self, term: terminal.Terminal) -> None:
+    def __init__(self, term: terminal.InteractiveTerminal) -> None:
         super().__init__()
         self.term = term
 

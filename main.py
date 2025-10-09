@@ -31,13 +31,13 @@ async def run_bot():
     ]
     dp.message.middleware(middlewares.GuardMiddleware(allowed_ids))
 
-    term = terminal.Terminal(
+    term = terminal.InteractiveTerminal(
         shell_name=os.environ.get("SHELL_NAME"),
         shell_args=os.environ.get("SHELL_ARGS"),
         env=os.environ,
         default_timeout=int(os.environ.get("SHELL_TIMEOUT")),
         expect_patterns=[
-            r'\[sudo\] password for .*: '
+            r'\[sudo\] password for .*: ',
         ],
     )
     dp.message.middleware(middlewares.TerminalMiddleware(term))

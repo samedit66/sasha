@@ -7,7 +7,6 @@ from aiogram.filters import command
 
 from src.sasha.core import terminal
 
-
 router = aiogram.Router()
 
 
@@ -19,7 +18,7 @@ async def check_health(message: types.Message) -> None:
 @router.message(aiogram.F.text)
 async def execute(
     message: types.Message,
-    term: terminal.Terminal,
+    term: terminal.InteractiveTerminal,
 ) -> None:
     shell_command = message.text.strip()
     result = await term.send(shell_command)
@@ -57,7 +56,7 @@ def output_message(shell_response: terminal.Response, max_len: int = 3500) -> st
         case terminal.Timeout(output=output, timeout=timeout):
             output_block = prepare_output_data(output, max_len) if output else "No output\\."
             return (
-                f"⏱️ **Timeout** (waited {timeout} sec)\n\n"
+                f"⏱️ **Timeout** \(waited {timeout} sec\)\n\n"
                 f"{output_block}\n\n"
                 "Command timed out, but the process may still be running\\. You can send more input to continue\\."
             )

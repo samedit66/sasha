@@ -1,6 +1,10 @@
 from __future__ import annotations
+
+import re
 from dataclasses import dataclass
+
 import pexpect
+import coloredstrings as cs
 
 
 @dataclass
@@ -40,27 +44,16 @@ type Response = Result | Continue | Error | Timeout
 
 
 class Terminal:
-    """
-    Thin wrapper around pexpect.spawn to allow dialog-style interactions.
-
-    Basic usage:
-        shell = Terminal()  # defaults to bash -lc
-        # If the command may prompt, provide expect_patterns to detect prompts:
-        r = shell.send('sudo apt-get install package', expect_patterns=[r'[Pp]assword:'])
-        if isinstance(r, Continue):
-            shell.send('mysecretpassword')
-        elif isinstance(r, Result):
-            print('done:', r.output)
-    """
 
     def __init__(
         self,
         shell_name: str = "bash",
-        shell_args: str | list[str] = "-lc",
+        shell_args: str | list[str] = "-i",
         env: dict[str, str] | None = None,
         encoding: str = "utf8",
         default_timeout: int = 30,
         expect_patterns: list[str] | None = None,
+        echo: bool = False,
     ) -> None:
         self.shell_name = shell_name
         self.shell_args = [shell_args] if isinstance(shell_args, str) else shell_args
@@ -68,7 +61,9 @@ class Terminal:
         self.encoding = encoding
         self.default_timeout = default_timeout
         self.expect_patterns = expect_patterns
+        self.echo = echo
         self.child: pexpect.spawn | None = None
+        self.prompt: str | None = None
 
     async def send(
         self,
@@ -77,14 +72,6 @@ class Terminal:
         env: dict[str, str] | None = None,
         expect_patterns: list[str] | None = None,
     ) -> Response:
-        """
-        Send input_data to a shell process. If there is no existing child process,
-        spawn one using `shell_name` + `shell_args + [input_data]`. Otherwise send
-        the input to the existing child (using sendline).
-
-        - expect_patterns: optional list of regular expressions. If any pattern matches,
-          a Continue is returned (with matched text). EOF -> Result. TIMEOUT -> Timeout.
-        """
         try:
             if timeout is None:
                 timeout = self.default_timeout
@@ -97,32 +84,45 @@ class Terminal:
 
             # spawn if first call
             if self.child is None:
-                args = self.shell_args + [input_data]
+                args = self.shell_args
                 self.child = pexpect.spawn(
                     self.shell_name,
                     args=args,
                     env=env,
                     encoding=self.encoding,
                     timeout=timeout,
+                    echo=self.echo,
                 )
-            else:
-                # use sendline to simulate user pressing Enter
-                self.child.sendline(input_data)
 
-            patterns = []
+                self.prompt = re.escape(
+                    self.child.read_nonblocking(
+                        size=128,
+                        timeout=10,
+                    ).strip()
+                )
+
+            # use sendline to simulate user pressing Enter
+            self.child.sendline(input_data)
+
+            patterns = [self.prompt]
             if expect_patterns is not None:
                 patterns.extend(expect_patterns)
             patterns.extend([pexpect.TIMEOUT, pexpect.EOF])
 
             index = await self.child.expect(patterns, timeout=timeout, async_=True)
 
-            # pexpect.EOF
-            if index == len(patterns) - 1:
-                self.child.close(force=True)
+            # pexpect.EOF or prompt
+            eof = (index == len(patterns) - 1)
+            if eof or index == 0:
+                if eof:
+                    self.child.close(force=True)
+
                 exit_status = self.child.exitstatus
                 signal_status = self.child.signalstatus
                 output = self.output()
-                self.child = None
+                
+                if eof:
+                    self.child = None
                 return Result(output, exit_status, signal_status)
 
             # pexpect.TIMEOUT
@@ -144,7 +144,7 @@ class Terminal:
             return Error(error=str(exc), output=partial)
 
     def output(self) -> str:
-        return (self.child.before or "").strip()
+        return cs.strip_ansi(self.child.before or "").strip()
 
     def is_alive(self) -> bool:
         return self.child is not None and self.child.isalive()
