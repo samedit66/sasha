@@ -25,10 +25,8 @@ async def run_bot():
         token=os.environ.get("TELEGRAM_BOT_TOKEN"),
     )
     dp = aiogram.Dispatcher()
-    
-    allowed_ids = [
-        int(i) for i in os.environ.get("TELEGRAM_USER_ID", "").split(",")
-    ]
+
+    allowed_ids = [int(i) for i in os.environ.get("TELEGRAM_USER_ID", "").split(",")]
     dp.message.middleware(middlewares.GuardMiddleware(allowed_ids))
 
     term = terminal.Terminal(
@@ -37,7 +35,7 @@ async def run_bot():
         env=os.environ,
         default_timeout=int(os.environ.get("SHELL_TIMEOUT")),
         expect_patterns=[
-            r'\[sudo\] password for .*: ',
+            r"\[sudo\] password for .*: ",
         ],
     )
     dp.message.middleware(middlewares.TerminalMiddleware(term))
