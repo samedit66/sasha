@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
 import uuid
+from dataclasses import dataclass
 
-import pexpect
 import coloredstrings as cs
+import pexpect
 
 
 @dataclass
@@ -71,6 +71,7 @@ class Terminal:
         timeout: int | None = None,
         env: dict[str, str] | None = None,
         expect_patterns: list[str] | None = None,
+        pretty_cd: bool = True,
     ) -> Response:
         try:
             if timeout is None:
@@ -96,7 +97,10 @@ class Terminal:
                 # Set a unique, stable prompt and disable PROMPT_COMMAND
                 unique = f"PEXPECT_PROMPT_{uuid.uuid4().hex}> "
 
-                if self.shell_name.endswith("powershell") or self.shell_name in ("pwsh", "powershell.exe"):
+                if self.shell_name.endswith("powershell") or self.shell_name in (
+                    "pwsh",
+                    "powershell.exe",
+                ):
                     # PowerShell: clear window title and override prompt function
                     # Use single quotes so the string is literal and not interpolated.
                     self.child.sendline("$Host.UI.RawUI.WindowTitle = ''")
@@ -104,11 +108,18 @@ class Terminal:
                 else:
                     # Bash-ish: disable PROMPT_COMMAND and set a fixed PS1
                     self.child.sendline("export PROMPT_COMMAND=''")
-                    self.child.sendline(f"export PS1='{unique}'") 
+                    self.child.sendline(f"export PS1='{unique}'")
 
                 # Wait for our new prompt to appear, then store an escaped regex for it
                 await self.child.expect(re.escape(unique), timeout=10, async_=True)
                 self.prompt = re.escape(unique)
+
+            # To make output a bit more pretty, we modify `cd` in a such way
+            # that it also returns the current directory after doing `cd`.
+            # It works in most cases, altough something like
+            # `perl -e 'print 1;' && cd ~` will fail
+            if pretty_cd and re.match(r"^\s*cd\s+", input_data):
+                input_data = f"{input_data} && pwd"
 
             # use sendline to simulate user pressing Enter
             self.child.sendline(input_data)
