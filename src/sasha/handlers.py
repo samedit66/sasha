@@ -15,7 +15,7 @@ async def check_health(message: types.Message) -> None:
     await message.reply("✅ Alive")
 
 
-@router.message(aiogram.F.text)
+@router.message(aiogram.F.text, flags={"long_operation": "typing"})
 async def execute(
     message: types.Message,
     term: terminal.Terminal,

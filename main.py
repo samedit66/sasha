@@ -29,6 +29,8 @@ async def run_bot():
     allowed_ids = [int(i) for i in os.environ.get("TELEGRAM_USER_ID", "").split(",")]
     dp.message.middleware(middlewares.GuardMiddleware(allowed_ids))
 
+    dp.message.middleware(middlewares.ChatActionMiddleware())
+
     term = terminal.Terminal(
         shell_name=os.environ.get("SHELL_NAME"),
         shell_args=os.environ.get("SHELL_ARGS"),
