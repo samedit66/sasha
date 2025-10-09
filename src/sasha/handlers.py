@@ -58,7 +58,7 @@ def output_message(shell_response: terminal.Response, max_len: int = 3500) -> st
                 prepare_output_data(output, max_len) if output else "No output\\."
             )
             return (
-                f"⏱️ **Timeout** \(waited {timeout} sec\)\n\n"
+                f"⏱️ **Timeout** \\(waited {timeout} sec\\)\n\n"
                 f"{output_block}\n\n"
                 "Command timed out, but the process may still be running\\. You can send more input to continue\\."
             )
