@@ -116,7 +116,7 @@ class Terminal:
 
             # To make output a bit more pretty, we modify `cd` in a such way
             # that it also returns the current directory after doing `cd`.
-            # It works in most cases, altough something like
+            # It works in most cases, although something like
             # `perl -e 'print 1;' && cd ~` will fail
             if pretty_cd and re.match(r"^\s*cd\s+", input_data):
                 input_data = f"{input_data} && pwd"
